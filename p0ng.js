@@ -11,11 +11,18 @@ var PADDLE_SIZE = 100;
 
 var scoreL = 0;
 var scoreR = 0;
+var MAX_SCORE = 5;
+
+var font;
+var fontsize = 40;
+
 
 function setup() {
 	var cnv = createCanvas(1100,600);
 	cnv.parent('sketch-holder');
 	cnv.style('display', 'block');
+	textSize(fontsize);
+	textAlign(CENTER, CENTER);
 
 	//createSprite(x,y,width,height)
 
@@ -164,9 +171,33 @@ function moveBall() {
 
 	if(ball.position.x < 0){
 		score(2);
+
+		if(scoreR >= MAX_SCORE){
+			fill(color(0,255,0));
+			text('Player 2 wins!', width*0.5, height*0.3);
+		}else{
+			fill(255);
+			text('Player 2 scores!', width*0.5, height*0.3);
+			setTimeout(function(){
+	    	loop();
+			}, 1500);
+		}
 	}
 	else if(ball.position.x > width){
 		score(1);
+
+		if(scoreL >= MAX_SCORE){
+			fill(color(255,0,0));
+			text('Player 1 wins!', width*0.5, height*0.3);
+		}else{
+			fill(255);
+			text('Player 1 scores!', width*0.5, height*0.3);
+			setTimeout(function(){
+	    	loop();
+			}, 1500);
+		}
+
+
 	}
 
 }
@@ -193,5 +224,7 @@ function score(player) {
 		var s= document.getElementById("scoreholder2");
 		s.innerHTML  = scoreR;
 	}
+
+	noLoop();
 
 }

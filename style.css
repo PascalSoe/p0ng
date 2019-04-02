@@ -13,7 +13,7 @@ body {
 
   /* This centers our sketch vertically. */
   //align-items: center;
-  
+
   /* Background color */
   background-color: #696969;
 }
@@ -25,11 +25,15 @@ body {
 	justify-content: center;
 }
 
+.score {
+  font-size: 2em;
+}
+
 #page {
 	position: absolute;
 	top: 615px;
 	width: 1100px;
-	
+
 	text-align: center;
 }
 
