@@ -44,3 +44,18 @@ body {
 #score2 {
 	float: right;
 }
+
+#center{
+  align-self: center;
+}
+
+#reset {
+  margin-block-start: 1.5em;
+  margin-block-end: 1.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-size: 20px;
+  padding: 5px 10px;
+  align-self: center;
+  border-radius: 6px;
+}

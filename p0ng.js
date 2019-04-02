@@ -49,7 +49,7 @@ function setup() {
 		stroke(0,0,255);
 		ellipse(0, 0, 25, 25);
 	}
-	ball.setSpeed(speed, 180);
+	ball.setSpeed(speed, Math.random() < 0.5 ? 0 : 180);
 
 	ellipse(width/2, height/2+30, 25, 25);
 
@@ -227,4 +227,29 @@ function score(player) {
 
 	noLoop();
 
+}
+
+function resetgame(){
+
+	allSprites.removeSprites();
+	clear();
+
+	//document.getElementById("reset").style.display="none";
+
+	speed = 7;
+	upL = false;
+	downL = false;
+	upR = false;
+	downR = false;
+	scoreL = 0;
+	scoreR = 0;
+
+	var s= document.getElementById("scoreholder1");
+	s.innerHTML  = scoreL;
+	var s= document.getElementById("scoreholder2");
+	s.innerHTML  = scoreR;
+
+	setup();
+
+	loop();
 }
