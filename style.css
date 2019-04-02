@@ -1,0 +1,42 @@
+/* style.css */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+
+  /* This centers our sketch vertically. */
+  //align-items: center;
+  
+  /* Background color */
+  background-color: #696969;
+}
+
+#sketch-holder {
+	width: 1100px;
+	height: 600px;
+	margin-top: 15px;
+	justify-content: center;
+}
+
+#page {
+	position: absolute;
+	top: 615px;
+	width: 1100px;
+	
+	text-align: center;
+}
+
+#score1 {
+	float: left;
+}
+
+#score2 {
+	float: right;
+}

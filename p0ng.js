@@ -12,7 +12,7 @@ var PADDLE_SIZE = 100;
 var scoreL = 0;
 var scoreR = 0;
 
-function setup() {	
+function setup() {
 	var cnv = createCanvas(1100,600);
 	cnv.parent('sketch-holder');
 	cnv.style('display', 'block');
@@ -30,11 +30,11 @@ function setup() {
 	wallTop = createSprite(width/2, -14, width, 30);
 	wallTop.immovable = true;
 	wallTop.shapeColor = color('white');
-	
+
 	wallBottom = createSprite(width/2, height+14, width, 30);
 	wallBottom.immovable = true;
 	wallBottom.shapeColor = color('white');
-	
+
 	ball = createSprite(width/2, height/2, 10, 10);
 	ball.maxSpeed = MAX_SPEED;
 	ball.draw = function () {
@@ -43,10 +43,10 @@ function setup() {
 		ellipse(0, 0, 25, 25);
 	}
 	ball.setSpeed(speed, 180);
-	
+
 	ellipse(width/2, height/2+30, 25, 25);
-	
-	
+
+
 	/* random sprites
 	for (x = 1; x <= 10; x++){
 		for (y = 1; y <= 5; y++) {
@@ -54,24 +54,24 @@ function setup() {
 		}
 	}
 	*/
-	
+
 }
 
-function draw() {	
-	background(0);  
-	
+function draw() {
+	background(0);
+
 	checkKeys();
-	
+
 	movePaddles();
-	
+
 	moveBall();
-	
+
 	drawSprites();
-	
+
 }
 
 function checkKeys() {
-	
+
 	//KEYDOWN
 	if(keyWentDown('up'))
 	{
@@ -93,7 +93,7 @@ function checkKeys() {
 		upL = false;
 		downL = true;
 	}
-	
+
 	//KEYUP
 	if(keyWentUp('up'))
 	{
@@ -121,19 +121,19 @@ function movePaddles() {
 		}
 	}
 	if(downR)
-	{	
+	{
 		if(!paddleR.bounce(wallBottom)){
 			paddleR.position.y = paddleR.position.y+MAX_SPEED/2;
 		}
 	}
 	if(upL)
-	{		
+	{
 		if(!paddleL.bounce(wallTop)){
 			paddleL.position.y = paddleL.position.y-MAX_SPEED/2;
 		}
 	}
 	if(downL)
-	{	
+	{
 		if(!paddleL.bounce(wallBottom)){
 			paddleL.position.y = paddleL.position.y+MAX_SPEED/2;
 		}
@@ -142,10 +142,10 @@ function movePaddles() {
 
 function moveBall() {
 	var bounceAngle;
-	
+
 	ball.bounce(wallTop);
 	ball.bounce(wallBottom);
-	
+
 	if(ball.bounce(paddleL)){
 		if(speed < MAX_SPEED){
 			speed += 1;
@@ -153,7 +153,7 @@ function moveBall() {
 		bounceAngle = (ball.position.y - paddleL.position.y) / 2
 		ball.setSpeed(speed, ball.getDirection()+bounceAngle);
 	}
-	
+
 	if(ball.bounce(paddleR)){
 		if(speed < MAX_SPEED){
 			speed += 1;
@@ -161,26 +161,26 @@ function moveBall() {
 		bounceAngle = (paddleR.position.y - ball.position.y) / 2
 		ball.setSpeed(speed, ball.getDirection()+bounceAngle);
 	}
-	
+
 	if(ball.position.x < 0){
 		score(2);
 	}
 	else if(ball.position.x > width){
 		score(1);
 	}
-	
+
 }
 
 
 function score(player) {
 	ball.position.x = width/2
 	ball.position.y = height/2
-	
+
 	paddleL.position.y = height/2
 	paddleR.position.y = height/2
-	
-	speed = 7;	
-	
+
+	speed = 7;
+
 	if(player == 1){
 		scoreL += 1;
 		ball.setSpeed(speed, 180);
@@ -193,6 +193,5 @@ function score(player) {
 		var s= document.getElementById("scoreholder2");
 		s.innerHTML  = scoreR;
 	}
-		
-}
 
+}
