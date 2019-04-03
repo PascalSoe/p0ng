@@ -1,6 +1,11 @@
-var paddleL, paddleR, ball, wallTop, wallBottom, ball2;
+var paddleL, paddleR, ball, wallTop, wallBottom, powerup;
 var MAX_SPEED = 15;
 var speed = 7;
+
+var powerfunction;
+var POWER_USED_DELAY = 10000;
+var POWER_RESPAWN = 5000;
+var id_of_timeout;
 
 var upL = false;
 var downL = false;
@@ -53,6 +58,9 @@ function setup() {
 
 	ellipse(width/2, height/2+30, 25, 25);
 
+	id_of_timeout = setTimeout(function(){
+		spawnpowerup();
+	}, 1000 + 1000 * random());
 
 	/* random sprites
 	for (x = 1; x <= 10; x++){
@@ -153,6 +161,7 @@ function moveBall() {
 	ball.bounce(wallTop);
 	ball.bounce(wallBottom);
 
+
 	if(ball.bounce(paddleL)){
 		if(speed < MAX_SPEED){
 			speed += 1;
@@ -200,8 +209,14 @@ function moveBall() {
 
 	}
 
+	if(powerup){
+		if(!powerup.removed){
+			ball.overlap(powerup, usepowerup);
+		} else {
+			despawnpowerup(POWER_RESPAWN);
+		}
+	}
 }
-
 
 function score(player) {
 	ball.position.x = width/2
@@ -233,7 +248,7 @@ function resetgame(){
 
 	allSprites.removeSprites();
 	clear();
-
+	clearTimeout(id_of_timeout);
 	//document.getElementById("reset").style.display="none";
 
 	speed = 7;
@@ -243,6 +258,8 @@ function resetgame(){
 	downR = false;
 	scoreL = 0;
 	scoreR = 0;
+	powerup = null;
+	id_of_timeout = null;
 
 	var s= document.getElementById("scoreholder1");
 	s.innerHTML  = scoreL;
@@ -252,4 +269,47 @@ function resetgame(){
 	setup();
 
 	loop();
+}
+
+function spawnpowerup(){
+		powerup = createSprite(40 + (width - 40)*random(), height*random(), 15, 15);
+		powerup.immovable = true;
+		pickApower();
+		powerup.shapeColor = color(255*random(),255*random(),255*random());
+		powerup.draw = function() {
+			fill(powerup.shapeColor);
+			ellipse(0,0,25,25);
+		}
+		powerup.life = Math.trunc(getFrameRate() * 15);
+}
+
+function despawnpowerup(spawndelay){
+	console.log("Powerup despawned");
+		if(powerup){
+			powerup.remove();
+		}
+		powerup = null;
+
+		id_of_timeout = setTimeout(function(){
+			spawnpowerup();
+		}, spawndelay + 10000 * random());
+}
+
+function usepowerup(){
+		despawnpowerup(POWER_USED_DELAY);
+		if(ball.getDirection() > 90 & ball.getDirection()<270){
+			powerfunction(2);
+		} else {
+			powerfunction(1);
+		}
+	}
+
+function pickApower(){
+	powerfunction = function(poweruser){
+		console.log(poweruser);
+		/*	TODO
+		create function array for powers at setup -> https://stackoverflow.com/questions/3592468/can-i-store-javascript-functions-in-arrays
+		get random funtction from function array
+		*/
+	}
 }
