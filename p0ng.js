@@ -3,7 +3,7 @@ var MAX_SPEED = 15;
 var speed = 7;
 
 var powerfunction;
-var POWER_USED_DELAY = 10000;
+var POWER_TIMER = 10000;
 var POWER_RESPAWN = 5000;
 var id_of_timeout;
 
@@ -21,6 +21,38 @@ var MAX_SCORE = 5;
 var font;
 var fontsize = 40;
 
+var powerups = [
+	function(user){
+		if(user===1){
+			paddleL.height = PADDLE_SIZE * 1.5;
+			setTimeout(function(){
+				paddleL.height = PADDLE_SIZE;
+			}, POWER_TIMER);
+		}
+		if(user===2){
+			paddleR.height = PADDLE_SIZE * 1.5;
+			setTimeout(function(){
+				paddleR.height = PADDLE_SIZE;
+			}, POWER_TIMER);
+		}
+	},
+	function(user){
+		if(user===1){
+			paddleR.height = PADDLE_SIZE * 0.5;
+			setTimeout(function(){
+				paddleR.height = PADDLE_SIZE;
+			}, POWER_TIMER);
+		}
+		if(user===2){
+			paddleL.height = PADDLE_SIZE * 0.5;
+			setTimeout(function(){
+				paddleL.height = PADDLE_SIZE;
+			}, POWER_TIMER);
+		}
+	}
+];
+
+//var powercolors = [color('#08FF15'),color('#FF0815')];
 
 function setup() {
 	var cnv = createCanvas(1100,600);
@@ -60,7 +92,7 @@ function setup() {
 
 	id_of_timeout = setTimeout(function(){
 		spawnpowerup();
-	}, 1000 + 1000 * random());
+	}, 10000 + 5000 * random());
 
 	/* random sprites
 	for (x = 1; x <= 10; x++){
@@ -178,6 +210,7 @@ function moveBall() {
 		ball.setSpeed(speed, ball.getDirection()+bounceAngle);
 	}
 
+	//score left
 	if(ball.position.x < 0){
 		score(2);
 
@@ -192,6 +225,7 @@ function moveBall() {
 			}, 1500);
 		}
 	}
+	//score right
 	else if(ball.position.x > width){
 		score(1);
 
@@ -205,10 +239,9 @@ function moveBall() {
 	    	loop();
 			}, 1500);
 		}
-
-
 	}
 
+	//collect powerup on collision
 	if(powerup){
 		if(!powerup.removed){
 			ball.overlap(powerup, usepowerup);
@@ -216,9 +249,11 @@ function moveBall() {
 			despawnpowerup(POWER_RESPAWN);
 		}
 	}
+
 }
 
 function score(player) {
+	//ball back to middle
 	ball.position.x = width/2
 	ball.position.y = height/2
 
@@ -240,6 +275,8 @@ function score(player) {
 		s.innerHTML  = scoreR;
 	}
 
+	despawnpowerup(0);
+
 	noLoop();
 
 }
@@ -248,6 +285,7 @@ function resetgame(){
 
 	allSprites.removeSprites();
 	clear();
+	despawnpowerup(0);
 	clearTimeout(id_of_timeout);
 	//document.getElementById("reset").style.display="none";
 
@@ -272,13 +310,13 @@ function resetgame(){
 }
 
 function spawnpowerup(){
-		powerup = createSprite(40 + (width - 40)*random(), height*random(), 15, 15);
+		powerup = createSprite(40 + (width - 80)*random(), 20 + (height - 20)*random(), 60, 60);
 		powerup.immovable = true;
 		pickApower();
-		powerup.shapeColor = color(255*random(),255*random(),255*random());
+		//powerup.shapeColor = powercolor;
 		powerup.draw = function() {
-			fill(powerup.shapeColor);
-			ellipse(0,0,25,25);
+			fill(powercolor);
+			ellipse(0,0,powerup.width);
 		}
 		powerup.life = Math.trunc(getFrameRate() * 15);
 }
@@ -290,13 +328,15 @@ function despawnpowerup(spawndelay){
 		}
 		powerup = null;
 
-		id_of_timeout = setTimeout(function(){
-			spawnpowerup();
-		}, spawndelay + 10000 * random());
+		if(spawndelay != 0){
+			id_of_timeout = setTimeout(function(){
+				spawnpowerup();
+			}, spawndelay + 10000 * random());
+		}
 }
 
 function usepowerup(){
-		despawnpowerup(POWER_USED_DELAY);
+		despawnpowerup(POWER_TIMER);
 		if(ball.getDirection() > 90 & ball.getDirection()<270){
 			powerfunction(2);
 		} else {
@@ -305,11 +345,28 @@ function usepowerup(){
 	}
 
 function pickApower(){
-	powerfunction = function(poweruser){
-		console.log(poweruser);
-		/*	TODO
-		create function array for powers at setup -> https://stackoverflow.com/questions/3592468/can-i-store-javascript-functions-in-arrays
-		get random funtction from function array
-		*/
+	var powerID = Math.floor(Math.random()*powerups.length);
+	powerfunction = powerups[powerID];
+	powercolor = powerID==0?color('#08FF15'):color('#FF0815');
+}
+
+
+
+
+
+/*
+	function growPad(user){
+	if(user===1){
+		paddleL.height = PADDLE_SIZE * 1.3;
+		setTimeout(function(){
+			paddleL.height = PADDLE_SIZE;
+		}, POWER_TIMER);
+	}
+	if(user===2){
+		paddleR.height = PADDLE_SIZE * 1.3;
+		setTimeout(function(){
+			paddleR.height = PADDLE_SIZE;
+		}, POWER_TIMER);
 	}
 }
+*/
