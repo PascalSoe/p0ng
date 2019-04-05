@@ -16,6 +16,7 @@ var PADDLE_SIZE = 100;
 
 var scoreL = 0;
 var scoreR = 0;
+var ballvalue = 1;
 var MAX_SCORE = 5;
 
 var font;
@@ -49,10 +50,14 @@ var powerups = [
 				paddleL.height = PADDLE_SIZE;
 			}, POWER_TIMER);
 		}
+	},function(user){
+		ballvalue += 1;
+		ball.shapeColor = color('#D4AF37');
 	}
+
 ];
 
-//var powercolors = [color('#08FF15'),color('#FF0815')];
+var powercolors = ['#08FF15', '#FF0815', '#D4AF37'];
 
 function setup() {
 	var cnv = createCanvas(1100,600);
@@ -81,18 +86,17 @@ function setup() {
 
 	ball = createSprite(width/2, height/2, 10, 10);
 	ball.maxSpeed = MAX_SPEED;
+	ball.shapeColor = color('#0000FF');
 	ball.draw = function () {
-		fill(0,0,255,255);
+		fill(ball.shapeColor);
 		stroke(0,0,255);
 		ellipse(0, 0, 25, 25);
 	}
 	ball.setSpeed(speed, Math.random() < 0.5 ? 0 : 180);
 
-	ellipse(width/2, height/2+30, 25, 25);
-
 	id_of_timeout = setTimeout(function(){
 		spawnpowerup();
-	}, 10000 + 5000 * random());
+	}, POWER_RESPAWN + 5000 * random());
 
 	/* random sprites
 	for (x = 1; x <= 10; x++){
@@ -210,6 +214,15 @@ function moveBall() {
 		ball.setSpeed(speed, ball.getDirection()+bounceAngle);
 	}
 
+	//collect powerup on collision
+	if(powerup){
+		if(!powerup.removed){
+			ball.overlap(powerup, usepowerup);
+		} else {
+			despawnpowerup(POWER_RESPAWN);
+		}
+	}
+
 	//score left
 	if(ball.position.x < 0){
 		score(2);
@@ -241,15 +254,6 @@ function moveBall() {
 		}
 	}
 
-	//collect powerup on collision
-	if(powerup){
-		if(!powerup.removed){
-			ball.overlap(powerup, usepowerup);
-		} else {
-			despawnpowerup(POWER_RESPAWN);
-		}
-	}
-
 }
 
 function score(player) {
@@ -263,19 +267,23 @@ function score(player) {
 	speed = 7;
 
 	if(player == 1){
-		scoreL += 1;
+		scoreL += ballvalue;
 		ball.setSpeed(speed, 180);
 		var s= document.getElementById("scoreholder1");
 		s.innerHTML  = scoreL;
 	}
 	if(player == 2){
-		scoreR += 1;
+		scoreR += ballvalue;
 		ball.setSpeed(speed, 0);
 		var s= document.getElementById("scoreholder2");
 		s.innerHTML  = scoreR;
 	}
 
-	despawnpowerup(0);
+	ballvalue = 1;
+
+	ball.shapeColor = color('#0000FF');
+
+	despawnpowerup(POWER_TIMER);
 
 	noLoop();
 
@@ -296,6 +304,7 @@ function resetgame(){
 	downR = false;
 	scoreL = 0;
 	scoreR = 0;
+	ballvalue = 1;
 	powerup = null;
 	id_of_timeout = null;
 
@@ -322,17 +331,17 @@ function spawnpowerup(){
 }
 
 function despawnpowerup(spawndelay){
-	console.log("Powerup despawned");
-		if(powerup){
+	if(powerup){
 			powerup.remove();
+			if(spawndelay != 0){
+				id_of_timeout = setTimeout(function(){
+					spawnpowerup();
+				}, spawndelay + 10000 * random());
 		}
-		powerup = null;
+	}
+	powerup = null;
 
-		if(spawndelay != 0){
-			id_of_timeout = setTimeout(function(){
-				spawnpowerup();
-			}, spawndelay + 10000 * random());
-		}
+
 }
 
 function usepowerup(){
@@ -347,11 +356,8 @@ function usepowerup(){
 function pickApower(){
 	var powerID = Math.floor(Math.random()*powerups.length);
 	powerfunction = powerups[powerID];
-	powercolor = powerID==0?color('#08FF15'):color('#FF0815');
+	powercolor = color(powercolors[powerID]);
 }
-
-
-
 
 
 /*
