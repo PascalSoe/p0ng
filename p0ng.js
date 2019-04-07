@@ -1,4 +1,4 @@
-var paddleL, paddleR, ball, wallTop, wallBottom, powerup;
+var paddleL, paddleR, ball, wallTop, wallBottom, powerup, rocket;
 var MAX_SPEED = 15;
 var speed = 7;
 
@@ -9,9 +9,10 @@ var id_of_timeout;
 
 var upL = false;
 var downL = false;
+var stopL = false;
 var upR = false;
 var downR = false;
-
+var stopR = false;
 var PADDLE_SIZE = 100;
 
 var scoreL = 0;
@@ -24,40 +25,18 @@ var fontsize = 40;
 
 var powerups = [
 	function(user){
-		if(user===1){
-			paddleL.height = PADDLE_SIZE * 1.5;
-			setTimeout(function(){
-				paddleL.height = PADDLE_SIZE;
-			}, POWER_TIMER);
-		}
-		if(user===2){
-			paddleR.height = PADDLE_SIZE * 1.5;
-			setTimeout(function(){
-				paddleR.height = PADDLE_SIZE;
-			}, POWER_TIMER);
-		}
-	},
-	function(user){
-		if(user===1){
-			paddleR.height = PADDLE_SIZE * 0.5;
-			setTimeout(function(){
-				paddleR.height = PADDLE_SIZE;
-			}, POWER_TIMER);
-		}
-		if(user===2){
-			paddleL.height = PADDLE_SIZE * 0.5;
-			setTimeout(function(){
-				paddleL.height = PADDLE_SIZE;
-			}, POWER_TIMER);
-		}
+		growPad(user);
 	},function(user){
-		ballvalue += 1;
-		ball.shapeColor = color('#D4AF37');
+		shrinkPad(user);
+	},function(user){
+		ballValue();
+	},function(user){
+		shootRocket(user);
 	}
 
 ];
 
-var powercolors = ['#08FF15', '#FF0815', '#D4AF37'];
+var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900'];
 
 function setup() {
 	var cnv = createCanvas(1100,600);
@@ -89,7 +68,7 @@ function setup() {
 	ball.shapeColor = color('#0000FF');
 	ball.draw = function () {
 		fill(ball.shapeColor);
-		stroke(0,0,255);
+		stroke(ball.shapeColor);
 		ellipse(0, 0, 25, 25);
 	}
 	ball.setSpeed(speed, Math.random() < 0.5 ? 0 : 180);
@@ -116,6 +95,8 @@ function draw() {
 	movePaddles();
 
 	moveBall();
+
+	checkOnRocket();
 
 	drawSprites();
 
@@ -165,30 +146,50 @@ function checkKeys() {
 }
 
 function movePaddles() {
-	if(upR)
-	{
-		if(!paddleR.bounce(wallTop)){
-			paddleR.position.y = paddleR.position.y-MAX_SPEED/2;
+	if(!stopR){
+		if(upR)
+		{
+			if(!paddleR.bounce(wallTop)){
+				paddleR.position.y = paddleR.position.y-MAX_SPEED/2;
+			}
+		}
+		if(downR)
+		{
+			if(!paddleR.bounce(wallBottom)){
+				paddleR.position.y = paddleR.position.y+MAX_SPEED/2;
+			}
 		}
 	}
-	if(downR)
-	{
-		if(!paddleR.bounce(wallBottom)){
-			paddleR.position.y = paddleR.position.y+MAX_SPEED/2;
+	if(!stopL){
+		if(upL)
+		{
+			if(!paddleL.bounce(wallTop)){
+				paddleL.position.y = paddleL.position.y-MAX_SPEED/2;
+			}
+		}
+		if(downL)
+		{
+			if(!paddleL.bounce(wallBottom)){
+				paddleL.position.y = paddleL.position.y+MAX_SPEED/2;
+			}
 		}
 	}
-	if(upL)
-	{
-		if(!paddleL.bounce(wallTop)){
-			paddleL.position.y = paddleL.position.y-MAX_SPEED/2;
-		}
+}
+
+function stopPaddle(paddle){
+	if(paddle===1){
+		stopL = true;
 	}
-	if(downL)
-	{
-		if(!paddleL.bounce(wallBottom)){
-			paddleL.position.y = paddleL.position.y+MAX_SPEED/2;
-		}
+	if(paddle===2){
+		stopR = true;
 	}
+	rocket.remove();
+	rocket = null;
+
+	setTimeout(function(){
+		stopL = false;
+		stopR = false;
+	}, 1000);
 }
 
 function moveBall() {
@@ -256,6 +257,27 @@ function moveBall() {
 
 }
 
+function checkOnRocket(){
+	if(rocket){
+		if(!rocket.removed){
+			if(rocket.position.x < 0 || rocket.position.x > width){
+				rocket.remove();
+				rocket = null;
+			}
+			else if(rocket.getDirection() == 180){
+				if(rocket.overlap(paddleL)){
+					stopPaddle(1);
+				}
+			}
+			else if(rocket.getDirection() == 0){
+				if(rocket.overlap(paddleR)){
+					stopPaddle(2);
+				}
+			}
+		}
+	}
+}
+
 function score(player) {
 	//ball back to middle
 	ball.position.x = width/2
@@ -265,6 +287,9 @@ function score(player) {
 	paddleR.position.y = height/2
 
 	speed = 7;
+
+	stopL = false;
+	stopR = false;
 
 	if(player == 1){
 		scoreL += ballvalue;
@@ -300,8 +325,10 @@ function resetgame(){
 	speed = 7;
 	upL = false;
 	downL = false;
+	stopL = false;
 	upR = false;
 	downR = false;
+	stopR = false;
 	scoreL = 0;
 	scoreR = 0;
 	ballvalue = 1;
@@ -319,7 +346,7 @@ function resetgame(){
 }
 
 function spawnpowerup(){
-		powerup = createSprite(40 + (width - 80)*random(), 20 + (height - 20)*random(), 60, 60);
+		powerup = createSprite(width * 0.3 + (width * 0.4 ) * random(), height * 0.1 + (height * 0.8) * random(), 60, 60);
 		powerup.immovable = true;
 		pickApower();
 		//powerup.shapeColor = powercolor;
@@ -340,8 +367,6 @@ function despawnpowerup(spawndelay){
 		}
 	}
 	powerup = null;
-
-
 }
 
 function usepowerup(){
@@ -359,6 +384,68 @@ function pickApower(){
 	powercolor = color(powercolors[powerID]);
 }
 
+function growPad(user){
+	if(user===1){
+		paddleL.height = PADDLE_SIZE * 1.5;
+		setTimeout(function(){
+			paddleL.height = PADDLE_SIZE;
+		}, POWER_TIMER);
+	}
+	if(user===2){
+		paddleR.height = PADDLE_SIZE * 1.5;
+		setTimeout(function(){
+			paddleR.height = PADDLE_SIZE;
+		}, POWER_TIMER);
+	}
+}
+
+function shrinkPad(user){
+	if(user===1){
+		paddleR.height = PADDLE_SIZE * 0.5;
+		setTimeout(function(){
+			paddleR.height = PADDLE_SIZE;
+		}, POWER_TIMER);
+	}
+	if(user===2){
+		paddleL.height = PADDLE_SIZE * 0.5;
+		setTimeout(function(){
+			paddleL.height = PADDLE_SIZE;
+		}, POWER_TIMER);
+	}
+}
+
+function ballValue(){
+	ballvalue += 1;
+	ball.shapeColor = color('#D4AF37');
+}
+
+function shootRocket(user){
+	var direction, x, y, col;
+	if(user==1){
+		x = paddleL.position.x;
+		y = paddleL.position.y;
+		col = paddleL.shapeColor
+		direction = 0;
+	}
+	if(user==2){
+		user=-1;
+		x = paddleR.position.x;
+		y = paddleR.position.y;
+		col = paddleR.shapeColor
+		direction = 180;
+	}
+
+	rocket = createSprite(x+20*user, y, 10, 10);
+	rocket.maxSpeed = 5;
+	rocket.shapeColor = col;
+	rocket.draw = function () {
+		fill(col);
+		stroke(col);
+		triangle(0, 10, 0, -10, user*20, 0);
+	}
+	rocket.setSpeed(speed, direction);
+	drawSprite(rocket);
+}
 
 /*
 	function growPad(user){
