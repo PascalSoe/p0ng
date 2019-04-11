@@ -24,29 +24,21 @@ var PADDLE_SIZE = 100;
 var scoreL = 0;
 var scoreR = 0;
 var ballvalue = 1;
-var MAX_SCORE = 5;
+var MAX_SCORE = 10;
 
-var font;
 var fontsize = 40;
 
 var powerups = [
-	function(user){
-		growPad(user);
-	},function(user){
-		shrinkPad(user);
-	},function(user){
-		ballValue();
-	},function(user){
-		shootRocket(user);
-	},function(user){
-		powershot(user);
-	}
-
+	function(user){growPad(user);},
+	function(user){shrinkPad(user);},
+	function(user){ballValue();},
+	function(user){shootRocket(user);},
+	function(user){powershot(user);}
 ];
 
 var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900', '#FFCCCC'];
 
-function setup() {
+function setup(){
 	var cnv = createCanvas(1100,600);
 	cnv.parent('sketch-holder');
 	cnv.style('display', 'block');
@@ -97,17 +89,9 @@ function setup() {
 		spawnpowerup();
 	}, POWER_RESPAWN + 5000 * random());
 
-	/* random sprites
-	for (x = 1; x <= 10; x++){
-		for (y = 1; y <= 5; y++) {
-			createSprite(x*100, y*100, 50, 50);
-		}
-	}
-	*/
-
 }
 
-function draw() {
+function draw(){
 	background(0);
 
 	checkKeys();
@@ -122,7 +106,7 @@ function draw() {
 
 }
 
-function checkKeys() {
+function checkKeys(){
 
 	//KEYDOWN
 	if(keyWentDown('up'))
@@ -165,7 +149,7 @@ function checkKeys() {
 	}
 }
 
-function movePaddles() {
+function movePaddles(){
 	if(!stopR){
 		if(upR)
 		{
@@ -212,7 +196,7 @@ function stopPaddle(paddle){
 	}, 1000);
 }
 
-function moveBall() {
+function moveBall(){
 	var bounceAngle;
 
 	ball.bounce(wallTop);
@@ -299,10 +283,13 @@ function checkOnRocket(){
 				}
 			}
 		}
+		else{
+			rocket = null;
+		}
 	}
 }
 
-function score(player) {
+function score(player){
 	//ball back to middle
 	ball.position.x = width/2
 	ball.position.y = height/2
@@ -333,6 +320,11 @@ function score(player) {
 	ballvalue = 1;
 
 	ball.shapeColor = color('#0000FF');
+
+	if(rocket){
+			rocket.remove();
+	}
+	rocket = null;
 
 	despawnpowerup(POWER_TIMER);
 
@@ -405,7 +397,7 @@ function usepowerup(){
 		} else {
 			powerfunction(1);
 		}
-	}
+}
 
 function pickApower(){
 	var powerID = Math.floor(Math.random()*powerups.length);
@@ -484,20 +476,3 @@ function powershot(user){
 		powerR = 5;
 	}
 }
-
-/*
-	function growPad(user){
-	if(user===1){
-		paddleL.height = PADDLE_SIZE * 1.3;
-		setTimeout(function(){
-			paddleL.height = PADDLE_SIZE;
-		}, POWER_TIMER);
-	}
-	if(user===2){
-		paddleR.height = PADDLE_SIZE * 1.3;
-		setTimeout(function(){
-			paddleR.height = PADDLE_SIZE;
-		}, POWER_TIMER);
-	}
-}
-*/
