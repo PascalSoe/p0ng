@@ -207,20 +207,36 @@ function moveBall(){
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-		bounceAngle = (ball.position.y - paddleL.position.y) / 2
+    
+    bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
+		if(bounceAngle>= 270 && bounceAngle < 300){
+			bounceAngle = 300;
+		}
+		if(bounceAngle<=90 && bounceAngle > 60 ){
+			bounceAngle = 60;
+		}
 		ball.maxSpeed = MAX_SPEED + powerL;
 		ball.setSpeed(speed + powerL, ball.getDirection()+bounceAngle);
 		powerL = 0;
+
 	}
 
 	if(ball.bounce(paddleR)){
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-		bounceAngle = (paddleR.position.y - ball.position.y) / 2
+    
+    bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
+		if(bounceAngle<= 270 && bounceAngle > 240){
+			bounceAngle = 240;
+		}
+		if(bounceAngle>=90 && bounceAngle < 120 ){
+			bounceAngle = 120;
+		}
 		ball.maxSpeed = MAX_SPEED + powerR;
 		ball.setSpeed(speed + powerR, ball.getDirection()+bounceAngle);
 		powerR = 0;
+
 	}
 
 	//collect powerup on collision
