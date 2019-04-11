@@ -1,11 +1,17 @@
 var paddleL, paddleR, ball, wallTop, wallBottom, powerup, rocket;
 var MAX_SPEED = 15;
 var speed = 7;
+var powerL = 0;
+var powerR = 0;
 
 var powerfunction;
 var POWER_TIMER = 10000;
 var POWER_RESPAWN = 5000;
 var id_of_timeout;
+
+var colorBall = '#0000ff';
+var colorL = '#ff0000';
+var colorR = '#00ff00';
 
 var upL = false;
 var downL = false;
@@ -18,27 +24,21 @@ var PADDLE_SIZE = 100;
 var scoreL = 0;
 var scoreR = 0;
 var ballvalue = 1;
-var MAX_SCORE = 5;
+var MAX_SCORE = 10;
 
-var font;
 var fontsize = 40;
 
 var powerups = [
-	function(user){
-		growPad(user);
-	},function(user){
-		shrinkPad(user);
-	},function(user){
-		ballValue();
-	},function(user){
-		shootRocket(user);
-	}
-
+	function(user){growPad(user);},
+	function(user){shrinkPad(user);},
+	function(user){ballValue();},
+	function(user){shootRocket(user);},
+	function(user){powershot(user);}
 ];
 
-var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900'];
+var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900', '#FFCCCC'];
 
-function setup() {
+function setup(){
 	var cnv = createCanvas(1100,600);
 	cnv.parent('sketch-holder');
 	cnv.style('display', 'block');
@@ -49,11 +49,22 @@ function setup() {
 
 	paddleL = createSprite(30, height/2, 10, PADDLE_SIZE);
 	paddleL.immovable = true;
-	paddleL.shapeColor = color(255,0,0);
+	paddleL.shapeColor = color(colorL);
+	paddleL.draw = function(){
+		fill(paddleL.shapeColor);
+		stroke(0);
+		rect(0,0,paddleL.width,paddleL.height);
+	}
+
 
 	paddleR = createSprite(width - 28, height/2, 10, PADDLE_SIZE);
 	paddleR.immovable = true;
-	paddleR.shapeColor = color(0,255,0);
+	paddleR.shapeColor = color(colorR);
+	paddleR.draw = function(){
+		fill(paddleR.shapeColor);
+		stroke(0);
+		rect(0,0,paddleR.width,paddleR.height);
+	}
 
 	wallTop = createSprite(width/2, -14, width, 30);
 	wallTop.immovable = true;
@@ -63,9 +74,10 @@ function setup() {
 	wallBottom.immovable = true;
 	wallBottom.shapeColor = color('white');
 
-	ball = createSprite(width/2, height/2, 10, 10);
+	ball = createSprite(width/2, height/2, 25, 25);
 	ball.maxSpeed = MAX_SPEED;
-	ball.shapeColor = color('#0000FF');
+	ball.shapeColor = color(colorBall);
+	ball.setCollider('circle');
 	ball.draw = function () {
 		fill(ball.shapeColor);
 		stroke(ball.shapeColor);
@@ -77,17 +89,9 @@ function setup() {
 		spawnpowerup();
 	}, POWER_RESPAWN + 5000 * random());
 
-	/* random sprites
-	for (x = 1; x <= 10; x++){
-		for (y = 1; y <= 5; y++) {
-			createSprite(x*100, y*100, 50, 50);
-		}
-	}
-	*/
-
 }
 
-function draw() {
+function draw(){
 	background(0);
 
 	checkKeys();
@@ -102,7 +106,7 @@ function draw() {
 
 }
 
-function checkKeys() {
+function checkKeys(){
 
 	//KEYDOWN
 	if(keyWentDown('up'))
@@ -145,7 +149,7 @@ function checkKeys() {
 	}
 }
 
-function movePaddles() {
+function movePaddles(){
 	if(!stopR){
 		if(upR)
 		{
@@ -192,7 +196,7 @@ function stopPaddle(paddle){
 	}, 1000);
 }
 
-function moveBall() {
+function moveBall(){
 	var bounceAngle;
 
 	ball.bounce(wallTop);
@@ -203,28 +207,36 @@ function moveBall() {
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-		bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
+    
+    bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
 		if(bounceAngle>= 270 && bounceAngle < 300){
 			bounceAngle = 300;
 		}
 		if(bounceAngle<=90 && bounceAngle > 60 ){
 			bounceAngle = 60;
 		}
-		ball.setSpeed(speed, bounceAngle);
+		ball.maxSpeed = MAX_SPEED + powerL;
+		ball.setSpeed(speed + powerL, ball.getDirection()+bounceAngle);
+		powerL = 0;
+
 	}
 
 	if(ball.bounce(paddleR)){
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-		bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
+    
+    bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
 		if(bounceAngle<= 270 && bounceAngle > 240){
 			bounceAngle = 240;
 		}
 		if(bounceAngle>=90 && bounceAngle < 120 ){
 			bounceAngle = 120;
 		}
-		ball.setSpeed(speed, bounceAngle);
+		ball.maxSpeed = MAX_SPEED + powerR;
+		ball.setSpeed(speed + powerR, ball.getDirection()+bounceAngle);
+		powerR = 0;
+
 	}
 
 	//collect powerup on collision
@@ -287,10 +299,13 @@ function checkOnRocket(){
 				}
 			}
 		}
+		else{
+			rocket = null;
+		}
 	}
 }
 
-function score(player) {
+function score(player){
 	//ball back to middle
 	ball.position.x = width/2
 	ball.position.y = height/2
@@ -299,6 +314,8 @@ function score(player) {
 	paddleR.position.y = height/2
 
 	speed = 7;
+	powerL = 0;
+	powerR = 0;
 
 	stopL = false;
 	stopR = false;
@@ -320,6 +337,11 @@ function score(player) {
 
 	ball.shapeColor = color('#0000FF');
 
+	if(rocket){
+			rocket.remove();
+	}
+	rocket = null;
+
 	despawnpowerup(POWER_TIMER);
 
 	noLoop();
@@ -335,6 +357,9 @@ function resetgame(){
 	//document.getElementById("reset").style.display="none";
 
 	speed = 7;
+	powerL = 0;
+	powerR = 0;
+
 	upL = false;
 	downL = false;
 	stopL = false;
@@ -361,7 +386,7 @@ function spawnpowerup(){
 		powerup = createSprite(width * 0.3 + (width * 0.4 ) * random(), height * 0.1 + (height * 0.8) * random(), 60, 60);
 		powerup.immovable = true;
 		pickApower();
-		//powerup.shapeColor = powercolor;
+		powerup.setCollider('circle');
 		powerup.draw = function() {
 			fill(powercolor);
 			ellipse(0,0,powerup.width);
@@ -388,7 +413,7 @@ function usepowerup(){
 		} else {
 			powerfunction(1);
 		}
-	}
+}
 
 function pickApower(){
 	var powerID = Math.floor(Math.random()*powerups.length);
@@ -459,19 +484,11 @@ function shootRocket(user){
 	drawSprite(rocket);
 }
 
-/*
-	function growPad(user){
-	if(user===1){
-		paddleL.height = PADDLE_SIZE * 1.3;
-		setTimeout(function(){
-			paddleL.height = PADDLE_SIZE;
-		}, POWER_TIMER);
+function powershot(user){
+	if(user==1){
+		powerL = 5;
 	}
-	if(user===2){
-		paddleR.height = PADDLE_SIZE * 1.3;
-		setTimeout(function(){
-			paddleR.height = PADDLE_SIZE;
-		}, POWER_TIMER);
+	if(user==2){
+		powerR = 5;
 	}
 }
-*/
