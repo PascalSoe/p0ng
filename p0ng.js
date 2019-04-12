@@ -3,6 +3,7 @@ var MAX_SPEED = 15;
 var speed = 7;
 var powerL = 0;
 var powerR = 0;
+var lasttouch = 0;
 
 var powerfunction;
 var POWER_TIMER = 10000;
@@ -207,8 +208,8 @@ function moveBall(){
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-    
-    bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
+		bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
+		bounceAngle = bounceAngle<0?360+bounceAngle:bounceAngle;
 		if(bounceAngle>= 270 && bounceAngle < 300){
 			bounceAngle = 300;
 		}
@@ -216,17 +217,17 @@ function moveBall(){
 			bounceAngle = 60;
 		}
 		ball.maxSpeed = MAX_SPEED + powerL;
-		ball.setSpeed(speed + powerL, ball.getDirection()+bounceAngle);
+		ball.setSpeed(speed + powerL, bounceAngle);
 		powerL = 0;
-
+		lasttouch = 1;
 	}
 
 	if(ball.bounce(paddleR)){
 		if(speed < MAX_SPEED){
 			speed += 1;
 		}
-    
-    bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
+		bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
+		bounceAngle = bounceAngle<0?360+bounceAngle:bounceAngle;
 		if(bounceAngle<= 270 && bounceAngle > 240){
 			bounceAngle = 240;
 		}
@@ -234,9 +235,9 @@ function moveBall(){
 			bounceAngle = 120;
 		}
 		ball.maxSpeed = MAX_SPEED + powerR;
-		ball.setSpeed(speed + powerR, ball.getDirection()+bounceAngle);
+		ball.setSpeed(speed + powerR, bounceAngle);
 		powerR = 0;
-
+		lasttouch = 2;
 	}
 
 	//collect powerup on collision
@@ -408,11 +409,7 @@ function despawnpowerup(spawndelay){
 
 function usepowerup(){
 		despawnpowerup(POWER_TIMER);
-		if(ball.getDirection() > 90 & ball.getDirection()<270){
-			powerfunction(2);
-		} else {
-			powerfunction(1);
-		}
+		powerfunction(lasttouch);
 }
 
 function pickApower(){
