@@ -1,3 +1,5 @@
+//https://codepen.io/slow_izzm/pen/GzQeoL?editors=0010
+
 var paddleL, paddleR, ball, wallTop, wallBottom, powerup, rocket;
 var MAX_SPEED = 15;
 var speed = 7;
@@ -26,6 +28,7 @@ var scoreL = 0;
 var scoreR = 0;
 var ballvalue = 1;
 var MAX_SCORE = 5;
+var gameEnd = false;
 
 var fontsize = 40;
 
@@ -96,19 +99,20 @@ function setup(){
 }
 
 function draw(){
-	background(0);
-
 	//this is handled by eventlistener now
 	//checkKeys();
+	if(!gameEnd)
+	{
+		background(0);
 
-	movePaddles();
+		movePaddles();
 
-	moveBall();
+		moveBall();
 
-	checkOnRocket();
+		checkOnRocket();
 
-	drawSprites();
-
+		drawSprites();
+	}
 }
 
 function checkKeyEvent(event){
@@ -307,9 +311,11 @@ function moveBall(){
 		if(scoreR >= MAX_SCORE){
 			fill(color(0,255,0));
 			text('Player 2 wins!', width*0.5, height*0.3);
+			gameEnd = true;
 		}else{
 			fill(255);
 			text('Player 2 scores!', width*0.5, height*0.3);
+			noLoop();
 			setTimeout(function(){
 	    	loop();
 			}, 1500);
@@ -322,9 +328,11 @@ function moveBall(){
 		if(scoreL >= MAX_SCORE){
 			fill(color(255,0,0));
 			text('Player 1 wins!', width*0.5, height*0.3);
+			gameEnd = true;
 		}else{
 			fill(255);
 			text('Player 1 scores!', width*0.5, height*0.3);
+			noLoop();
 			setTimeout(function(){
 	    	loop();
 			}, 1500);
@@ -396,8 +404,6 @@ function score(player){
 
 	despawnpowerup(POWER_TIMER);
 
-	noLoop();
-
 }
 
 function resetgame(){
@@ -423,6 +429,7 @@ function resetgame(){
 	ballvalue = 1;
 	powerup = null;
 	id_of_timeout = null;
+	gameEnd = false;
 
 	var s= document.getElementById("scoreholder1");
 	s.innerHTML  = scoreL;
