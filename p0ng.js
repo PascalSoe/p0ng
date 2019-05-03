@@ -25,7 +25,7 @@ var PADDLE_SIZE = 100;
 var scoreL = 0;
 var scoreR = 0;
 var ballvalue = 1;
-var MAX_SCORE = 10;
+var MAX_SCORE = 5;
 
 var fontsize = 40;
 
@@ -38,6 +38,9 @@ var powerups = [
 ];
 
 var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900', '#FFCCCC'];
+
+document.addEventListener("keydown", checkKeyEvent);
+document.addEventListener("keyup", checkKeyEvent);
 
 function setup(){
 	var cnv = createCanvas(1100,600);
@@ -95,7 +98,8 @@ function setup(){
 function draw(){
 	background(0);
 
-	checkKeys();
+	//this is handled by eventlistener now
+	//checkKeys();
 
 	movePaddles();
 
@@ -104,6 +108,53 @@ function draw(){
 	checkOnRocket();
 
 	drawSprites();
+
+}
+
+function checkKeyEvent(event){
+
+	if(event.type!='keydown' && event.type!='keyup')
+	{
+		return;
+	}
+
+	if(event.type==='keydown' && event.which==38) //up
+	{
+		upR = true;
+		downR = false;
+	}
+	if(event.type==='keydown' && event.which==40) //down
+	{
+		upR = false;
+		downR = true;
+	}
+	if(event.type==='keydown' && event.which==87) //w
+	{
+		upL = true;
+		downL = false;
+	}
+	if(event.type==='keydown' && event.which==83) //s
+	{
+		upL = false;
+		downL = true;
+	}
+
+	if(event.type==='keyup' && event.which==38) //up
+	{
+		upR = false;
+	}
+	if(event.type==='keyup' && event.which==40) //down
+	{
+		downR = false;
+	}
+	if(event.type==='keyup' && event.which==87) //w
+	{
+		upL = false;
+	}
+	if(event.type==='keyup' && event.which==83) //s
+	{
+		downL = false;
+	}
 
 }
 
