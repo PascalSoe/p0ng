@@ -24,23 +24,27 @@ var downR = false;
 var stopR = false;
 var PADDLE_SIZE = 100;
 
-var scoreL = 0;
-var scoreR = 0;
+let scoreL = 0;
+let scoreR = 0;
 var ballvalue = 1;
 var MAX_SCORE = 5;
-var gameEnd = false;
+var gameEnd = 0;
+let playercolor = ['#000000','#ff0000','#00ff00'];
 
 var fontsize = 40;
 
-var powerups = [
+let powerups = [
 	function(user){growPad(user);},
 	function(user){shrinkPad(user);},
 	function(user){ballValue();},
 	function(user){shootRocket(user);},
 	function(user){powershot(user);}
 ];
+let powercolors = ['#08ff15', '#ff0815', '#d4af37', '#ff9900', '#ffcccc'];
 
-var powercolors = ['#08FF15', '#FF0815', '#D4AF37', '#FF9900', '#FFCCCC'];
+let confetti = [];
+let confettiColor = ['#00aeef', '#ec008c', '#72c8b6'];
+
 
 document.addEventListener("keydown", checkKeyEvent);
 document.addEventListener("keyup", checkKeyEvent);
@@ -92,6 +96,10 @@ function setup(){
 	}
 	ball.setSpeed(speed, Math.random() < 0.5 ? 0 : 180);
 
+	for (let i = 0; i < 100; i++) {
+    	confetti[i] = new Confetti(random(0, width), random(-height, 0), random(-1, 1));
+  	}
+
 	id_of_timeout = setTimeout(function(){
 		spawnpowerup();
 	}, POWER_RESPAWN + 5000 * random());
@@ -101,7 +109,7 @@ function setup(){
 function draw(){
 	//this is handled by eventlistener now
 	//checkKeys();
-	if(!gameEnd)
+	if(gameEnd==0)
 	{
 		background(0);
 
@@ -111,6 +119,16 @@ function draw(){
 
 		checkOnRocket();
 
+		drawSprites();
+	}
+	else
+	{
+		clearTimeout(id_of_timeout);
+		ball.setSpeed(0);
+		background(0);
+		fill(color(playercolor[gameEnd]));
+		text('Player ' + gameEnd + ' wins!', width*0.5, height*0.3);
+		rain();
 		drawSprites();
 	}
 }
@@ -309,9 +327,10 @@ function moveBall(){
 		score(2);
 
 		if(scoreR >= MAX_SCORE){
+			gameEnd = 2;
 			fill(color(0,255,0));
-			text('Player 2 wins!', width*0.5, height*0.3);
-			gameEnd = true;
+			text('Player ' + gameEnd + ' wins!', width*0.5, height*0.3);
+			ball.setSpeed(0);
 		}else{
 			fill(255);
 			text('Player 2 scores!', width*0.5, height*0.3);
@@ -326,9 +345,10 @@ function moveBall(){
 		score(1);
 
 		if(scoreL >= MAX_SCORE){
+			gameEnd = 1;
 			fill(color(255,0,0));
-			text('Player 1 wins!', width*0.5, height*0.3);
-			gameEnd = true;
+			text('Player ' + gameEnd + ' wins!', width*0.5, height*0.3);
+			ball.setSpeed(0);
 		}else{
 			fill(255);
 			text('Player 1 scores!', width*0.5, height*0.3);
@@ -429,7 +449,7 @@ function resetgame(){
 	ballvalue = 1;
 	powerup = null;
 	id_of_timeout = null;
-	gameEnd = false;
+	gameEnd = 0;
 
 	var s= document.getElementById("scoreholder1");
 	s.innerHTML  = scoreL;
@@ -546,4 +566,55 @@ function powershot(user){
 	if(user==2){
 		powerR = 5;
 	}
+}
+
+function rain(){
+	for (let i = 0; i < confetti.length / 2; i++) {
+    confetti[i].confettiDisplay();
+
+    if (confetti[i].y > height) {
+      confetti[i] = new Confetti(random(0, width), random(-height, 0), random(-1, 1));
+    }
+  }
+
+  for (let i = int(confetti.length / 2); i < confetti.length; i++) {
+    confetti[i].confettiDisplay();
+
+    if (confetti[i].y > height) {
+      confetti[i] = new Confetti(random(0, width), random(-height, 0), random(-1, 1));
+    }
+  }
+}
+
+class Confetti {
+  constructor(_x, _y, _s) {
+    this.x = _x;
+    this.y = _y;
+    this.speed = _s;
+    this.time = random(0, 100);
+    this.color = color(random(confettiColor));
+    this.amp = random(2, 30);
+    this.phase = random(0.5, 2);
+    this.size = random(width / 25, height / 50);
+  }
+
+  confettiDisplay() {
+    fill(this.color);
+    // blendMode(SCREEN);
+    noStroke();
+    push();
+    translate(this.x, this.y);
+    translate(this.amp * sin(this.time * this.phase), this.speed * cos(2 * this.time * this.phase));
+    rotate(this.time);
+    rectMode(CENTER);
+    scale(cos(this.time / 4), sin(this.time / 4));
+    rect(0, 0, this.size, this.size / 2);
+    pop();
+
+    this.time = this.time + 0.1;
+
+    this.speed += 1 / 200;
+
+    this.y += this.speed;
+  }
 }
