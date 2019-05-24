@@ -283,10 +283,11 @@ function moveBall(){
 		}
 		bounceAngle = ball.getDirection() + (ball.position.y - paddleL.position.y) / 2;
 		bounceAngle = bounceAngle<0?360+bounceAngle:bounceAngle;
-		if(bounceAngle>= 270 && bounceAngle < 300){
+		bounceAngle = bounceAngle>360?bounceAngle-360:bounceAngle;
+		if(bounceAngle>= 240 && bounceAngle < 300){
 			bounceAngle = 300;
 		}
-		if(bounceAngle<=90 && bounceAngle > 60 ){
+		if(bounceAngle<=120 && bounceAngle > 60 ){
 			bounceAngle = 60;
 		}
 		ball.maxSpeed = MAX_SPEED + powerL;
@@ -301,10 +302,11 @@ function moveBall(){
 		}
 		bounceAngle = ball.getDirection() + (paddleR.position.y - ball.position.y) / 2;
 		bounceAngle = bounceAngle<0?360+bounceAngle:bounceAngle;
-		if(bounceAngle<= 270 && bounceAngle > 240){
+		bounceAngle = bounceAngle>360?bounceAngle-360:bounceAngle;
+		if(bounceAngle<= 300 && bounceAngle > 240){
 			bounceAngle = 240;
 		}
-		if(bounceAngle>=90 && bounceAngle < 120 ){
+		if(bounceAngle>=60 && bounceAngle < 120 ){
 			bounceAngle = 120;
 		}
 		ball.maxSpeed = MAX_SPEED + powerR;
